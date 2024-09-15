@@ -20,4 +20,7 @@ To perform lateral movement with OpsLoader, run 'jump moveit [target] [listener]
 ### Lateral Movement
 
 ## Limitations
-* This project only works so far on Linux systems and requires mingw on the box
+* This project only works so far on Linux systems and requires mingw on your box
+* So far I only provide a generated payload that performs process injection, nothing local.
+
+### References

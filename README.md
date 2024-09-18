@@ -16,11 +16,16 @@ To perform lateral movement with OpsLoader, run 'jump moveit [target] [listener]
 ## Demo
 
 ### Payload Generation
+![OpsLoader Generation](opsgenerate.gif)
 
 ### Lateral Movement
+![OpsLoader Lateral Movement](opsmovement.gif)
 
 ## Limitations
 * This project only works so far on Linux systems and requires mingw on your box
 * So far I only provide a generated payload that performs process injection, nothing local.
 
-### References
+## References
+[C# Payload Generator for Windows](https://github.com/Workingdaturah/Payload-Generator)
+[Cobalt Strike Aggressor Functions](https://hstechdocs.helpsystems.com/manuals/cobaltstrike/current/userguide/content/topics_aggressor-scripts/as-resources_functions.htm)
+[Sleep Syntax](http://sleep.dashnine.org/manual/)

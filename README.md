@@ -16,10 +16,10 @@ To perform lateral movement with OpsLoader, run 'jump moveit [target] [listener]
 ## Demo
 
 ### Payload Generation
-![OpsLoader Generation](opsgenerate.gif)
+![OpsLoader Generation](demos/generate.gif)
 
 ### Lateral Movement
-![OpsLoader Lateral Movement](opsmovement.gif)
+![OpsLoader Lateral Movement](demos/movement.gif)
 
 ## Limitations
 * This project only works so far on Linux systems and requires mingw on your box

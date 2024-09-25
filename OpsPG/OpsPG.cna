@@ -1,10 +1,10 @@
 # My custom OpsLoader Payload Generator
 # by Agent007
 # I heavily referenced these resources. Show them some love:
-    # https://github.com/Workingdaturah/Payload-Generator
+    # https://github.com/Workingdaturah/Payload-Generator <- Did most of the hard work for me already
     # https://hstechdocs.helpsystems.com/manuals/cobaltstrike/current/userguide/content/topics_aggressor-scripts/as-resources_functions.htm <- Huge list of functions to help me customize
 
-$teamserver = "/home/ee/Tools/CobaltStrike/Server/"; # <-- SET THE LOCATION CONTAINING THE TEAMSERVER BINARY AND OpsPG FOLDER HERE
+$teamserver = "/home/ee/Tools/c2/CobaltStrike/Server/"; # <-- SET THE LOCATION CONTAINING THE TEAMSERVER BINARY AND OpsPG FOLDER HERE
 
 
 #######################################
@@ -30,7 +30,7 @@ sub genPayloadMenu {
 	dialog_description($dialog, "Creates an x64 exe using OpsLoader & Beacon shellcode");
 	
 	# Adds a listener selection row to a &dialog. This row only shows listeners with stagers (e.g., windows/beacon_https/reverse_https).
-	drow_listener($dialog, "listener", "Listener: ");     
+	drow_listener_stage($dialog, "listener", "Listener: "); # Alternative is drow_listener which only shows staged Beacons whereas this shows stageless and staged
 
 	# Adds a text field row to a &dialog
 	drow_text($dialog, "Exe_name", "Executable Name: "); 

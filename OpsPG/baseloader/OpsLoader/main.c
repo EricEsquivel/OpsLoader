@@ -312,10 +312,6 @@ BOOL CreatePPidSpoofedProcess(IN HANDLE hParentProcess, IN LPCSTR lpProcessName,
 	sprintf_s(lpPath, sizeof(lpPath), "%s\\System32\\%s -Embedding", WnDr, lpProcessName); // Spoofing RuntimeBroker.exe
 	sprintf_s(lpBasePath, sizeof(lpBasePath), "%s\\system32", WnDr); // To be used with RuntimeBroker.exe
 
-	//sprintf_s(lpPath, sizeof(lpPath), "%s\\SystemApps\\Microsoft.Windows.Search_cw5n1h2txyewy\\SearchApp.exe -ServerName:CortanaUI.AppX8z9r6jm96hw4bsbneegw0kyxx296wr9t.mca", WnDr); // Spoofing SearchApp.exe
-	//sprintf_s(lpBasePath, sizeof(lpBasePath), "%s\\SystemApps\\Microsoft.Windows.Search_cw5n1h2txyewy\\", WnDr); // To be used with SearchApp.exe
-
-
 	//-------------------------------------------------------------------------------
 
 	// This will fail with ERROR_INSUFFICIENT_BUFFER, as expected
